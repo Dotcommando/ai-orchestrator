@@ -1,20 +1,86 @@
 <script type="text/javascript">
-  RED.nodes.registerType("stage-plan-runner", {
-    category: "function",
-    color: "#D9E6F2",
-    icon: "flow.svg",
-    defaults: {
-      name: { value: "" },
-    },
-    inputs: 1,
-    outputs: 1,
-    label: function () { return this.name || "stage-plan-runner"; },
-  });
+  (function () {
+    const SCHEMAS = (globalThis.AIO_ENUMS && globalThis.AIO_ENUMS.EXIT_SCHEMAS) || [
+      'success-failure',
+      'success-failure-clarification',
+      'success-failure-retry',
+      'success-failure-review',
+      'full',
+    ];
+    const EXITS = ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'];
+
+    function fillSelect(selector, values, current, fallback) {
+      const el = $(selector);
+      el.empty();
+      for (let i = 0; i < values.length; i++) {
+        const v = values[i];
+        const opt = $('<option></option>').val(v).text(v);
+        if ((current ?? fallback) === v) opt.attr('selected', 'selected');
+        el.append(opt);
+      }
+    }
+
+    RED.nodes.registerType('stage-plan-runner', {
+      category: 'function',
+      color: '#D9E6F2',
+      icon: 'flow.svg',
+      defaults: {
+        name: { value: '' },
+        exitSchema: { value: 'full' },
+        maxAttempts: { value: 0 },
+        onExhausted: { value: 'retry' },
+        advanceOnSuccess: { value: true },
+        resetAttemptOnAdvance: { value: true },
+        preferBlockedAs: { value: 'failure' },
+      },
+      inputs: 1,
+      outputs: 6,
+      outputLabels: ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'],
+      label: function () {
+        return this.name ?? 'stage-plan-runner';
+      },
+      oneditprepare: function () {
+        fillSelect('#node-input-exitSchema', SCHEMAS, this.exitSchema, 'full');
+        fillSelect('#node-input-onExhausted', EXITS, this.onExhausted, 'retry');
+        fillSelect('#node-input-preferBlockedAs', EXITS, this.preferBlockedAs, 'failure');
+      },
+    });
+  })();
 </script>
 
 <script type="text/html" data-template-name="stage-plan-runner">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name">
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-exitSchema"><i class="fa fa-random"></i> Exit schema</label>
+        <select id="node-input-exitSchema"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-maxAttempts"><i class="fa fa-repeat"></i> Max attempts (0 = off)</label>
+        <input type="number" id="node-input-maxAttempts" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-onExhausted"><i class="fa fa-exclamation-triangle"></i> On exhausted</label>
+        <select id="node-input-onExhausted"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-advanceOnSuccess"><i class="fa fa-forward"></i> Advance on success</label>
+        <input type="checkbox" id="node-input-advanceOnSuccess" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-resetAttemptOnAdvance"><i class="fa fa-undo"></i> Reset attempt on advance</label>
+        <input type="checkbox" id="node-input-resetAttemptOnAdvance" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-preferBlockedAs"><i class="fa fa-ban"></i> Map blocked as</label>
+        <select id="node-input-preferBlockedAs"></select>
     </div>
 </script>
