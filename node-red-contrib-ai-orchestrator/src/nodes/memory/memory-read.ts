@@ -24,6 +24,7 @@ interface IMemoryReadConfig {
 function register(RED: IRED): void {
   function parseTags(csv?: string): string[] | undefined {
     if (!csv) return undefined;
+
     const items = csv
       .split(',')
       .map((tag) => tag.trim())

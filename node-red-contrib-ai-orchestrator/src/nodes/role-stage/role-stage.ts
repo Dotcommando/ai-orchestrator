@@ -37,6 +37,7 @@ function register(RED: IRED): void {
 
   function isExitSchema(value: unknown): value is EXIT_SCHEMA {
     if (typeof value !== 'string') return false;
+
     const values = Object.values(EXIT_SCHEMA);
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
