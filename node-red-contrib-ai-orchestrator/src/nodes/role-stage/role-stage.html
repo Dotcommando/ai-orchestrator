@@ -1,18 +1,12 @@
+<script src="editor/enums.js"></script>
 <script type="text/javascript">
   (function () {
-    const EXIT_SCHEMAS = [
-      'success-failure',
-      'success-failure-clarification',
-      'success-failure-retry',
-      'success-failure-review',
-      'full',
-    ];
-
     function fillSchemaSelect(current) {
       const $schema = $('#node-input-exitSchema');
+      const values = (window.AIO_ENUMS && window.AIO_ENUMS.EXIT_SCHEMAS) || [];
       $schema.empty();
-      for (let i = 0; i < EXIT_SCHEMAS.length; i++) {
-        const value = EXIT_SCHEMAS[i];
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
         const option = $('<option></option>').val(value).text(value);
         if ((current ?? 'success-failure') === value) option.attr('selected', 'selected');
         $schema.append(option);
@@ -32,14 +26,7 @@
       },
       inputs: 1,
       outputs: 6,
-      outputLabels: [
-        'success',
-        'failure',
-        'clarification',
-        'blocked',
-        'retry',
-        'review',
-      ],
+      outputLabels: ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'],
       label: function () {
         return this.name ?? 'role-stage';
       },

@@ -2,7 +2,7 @@ import {
   IMemoryWriteRequest,
   IOrchestratorMsg,
   IOrchestratorMsgExtended,
-  TVisibility,
+  VISIBILITY,
 } from '../../types';
 import { INode, IRED } from '../_common';
 
@@ -14,7 +14,7 @@ interface IMemoryWriteConfig {
   text?: string;
   scope?: string;
   scopeRef?: string;
-  visibility: TVisibility;
+  visibility: VISIBILITY;
   tags?: string;
   allowedRolesJson?: string;
   allowedMembersJson?: string;

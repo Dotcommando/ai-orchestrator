@@ -27,8 +27,8 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && cpy \"src/**/*.html\" dist --parents && node scripts/postbuild-fix-extensions.mjs",
-    "watch": "concurrently \"tsc -w\" \"cpy 'src/**/*.html' dist --parents --watch\"",
+    "build": "tsc -p tsconfig.json && cpy \"src/**/*.html\" dist --parents && cpy \"src/editor/*.js\" dist --parents && node scripts/postbuild-fix-extensions.mjs",
+    "watch": "concurrently \"tsc -w\" \"cpy 'src/**/*.html' dist --parents --watch\" \"cpy 'src/editor/*.js' dist --parents --watch\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "prepare": "husky install"

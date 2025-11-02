@@ -1,13 +1,6 @@
+<script src="editor/enums.js"></script>
 <script type="text/javascript">
   (function () {
-    var EXIT_SCHEMAS = [
-      'success-failure',
-      'success-failure-clarification',
-      'success-failure-retry',
-      'success-failure-review',
-      'full',
-    ];
-
     RED.nodes.registerType('project-config', {
       category: 'config',
       defaults: {
@@ -20,26 +13,28 @@
         return this.name || this.key || 'project-config';
       },
       oneditprepare: function () {
-        var $schema = $('#node-config-input-defaultExitSchema');
-        var current = this.defaultExitSchema || 'success-failure';
+        const values = (window.AIO_ENUMS && window.AIO_ENUMS.EXIT_SCHEMAS) || [];
+        const $schema = $('#node-config-input-defaultExitSchema');
+        const current = this.defaultExitSchema || 'success-failure';
 
         $schema.empty();
-        EXIT_SCHEMAS.forEach(function (s) {
-          var opt = $('<option></option>').val(s).text(s);
+        for (let i = 0; i < values.length; i++) {
+          const s = values[i];
+          const opt = $('<option></option>').val(s).text(s);
           if (s === current) opt.attr('selected', 'selected');
           $schema.append(opt);
-        });
+        }
 
-        var $policy = $('#node-config-input-policy');
+        const $policy = $('#node-config-input-policy');
         if (!$policy.val()) $policy.val('{}');
       },
       oneditsave: function () {
-        var raw = $('#node-config-input-policy').val() || '{}';
+        const raw = $('#node-config-input-policy').val() || '{}';
 
         try {
-          var v = JSON.parse(String(raw));
+          const v = JSON.parse(String(raw));
           if (v && typeof v === 'object') return;
-        } catch (e) {}
+        } catch {}
 
         RED.notify('Policy must be valid JSON object', 'error');
         throw new Error('invalid policy json');

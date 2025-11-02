@@ -1,12 +1,6 @@
+<script src="editor/enums.js"></script>
 <script type="text/javascript">
   (function () {
-    const SCHEMAS = [
-      'full',
-      'success-failure',
-      'success-failure-clarification',
-      'success-failure-retry',
-      'success-failure-review',
-    ];
     const ON_EXHAUSTED = ['retry', 'failure', 'review', 'clarification'];
     const PREFER_BLOCKED_AS = ['failure', 'review', 'clarification'];
 
@@ -35,9 +29,12 @@
       inputs: 1,
       outputs: 6,
       outputLabels: ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'],
-      label: function () { return this.name || 'agent-exec'; },
+      label: function () {
+        return this.name || 'agent-exec';
+      },
       oneditprepare: function () {
-        fillSelect('#node-input-exitSchema', SCHEMAS, this.exitSchema, 'full');
+        const schemas = (window.AIO_ENUMS && window.AIO_ENUMS.EXIT_SCHEMAS) || [];
+        fillSelect('#node-input-exitSchema', schemas, this.exitSchema, 'full');
         fillSelect('#node-input-onExhausted', ON_EXHAUSTED, this.onExhausted, 'retry');
         fillSelect('#node-input-preferBlockedAs', PREFER_BLOCKED_AS, this.preferBlockedAs, 'failure');
       },

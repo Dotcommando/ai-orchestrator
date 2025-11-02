@@ -1,35 +1,53 @@
-export type TExit = 'success' | 'failure' | 'clarification' | 'blocked' | 'retry' | 'review';
-
-export enum ExitPort {
-  Success = 0,
-  Failure = 1,
-  Clarification = 2,
-  Blocked = 3,
-  Retry = 4,
-  Review = 5,
+export enum EXIT {
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  CLARIFICATION = 'clarification',
+  BLOCKED = 'blocked',
+  RETRY = 'retry',
+  REVIEW = 'review',
 }
 
-export const EXIT_TO_PORT: Record<TExit, ExitPort> = {
-  success: ExitPort.Success,
-  failure: ExitPort.Failure,
-  clarification: ExitPort.Clarification,
-  blocked: ExitPort.Blocked,
-  retry: ExitPort.Retry,
-  review: ExitPort.Review,
+export type TExit = EXIT;
+
+export enum EXIT_PORT {
+  SUCCESS = 0,
+  FAILURE = 1,
+  CLARIFICATION = 2,
+  BLOCKED = 3,
+  RETRY = 4,
+  REVIEW = 5,
+}
+
+export const EXIT_TO_PORT: Record<EXIT, EXIT_PORT> = {
+  [EXIT.SUCCESS]: EXIT_PORT.SUCCESS,
+  [EXIT.FAILURE]: EXIT_PORT.FAILURE,
+  [EXIT.CLARIFICATION]: EXIT_PORT.CLARIFICATION,
+  [EXIT.BLOCKED]: EXIT_PORT.BLOCKED,
+  [EXIT.RETRY]: EXIT_PORT.RETRY,
+  [EXIT.REVIEW]: EXIT_PORT.REVIEW,
 };
 
-export const EXIT_SCHEMAS: readonly string[] = [
-  'success-failure',
-  'success-failure-clarification',
-  'success-failure-retry',
-  'success-failure-review',
-  'full',
-];
+export enum EXIT_SCHEMA {
+  SUCCESS_FAILURE = 'success-failure',
+  SUCCESS_FAILURE_CLARIFICATION = 'success-failure-clarification',
+  SUCCESS_FAILURE_RETRY = 'success-failure-retry',
+  SUCCESS_FAILURE_REVIEW = 'success-failure-review',
+  FULL = 'full',
+}
 
-export const ALLOWED_EXITS_BY_SCHEMA: Record<string, TExit[]> = {
-  'success-failure': ['success', 'failure'],
-  'success-failure-clarification': ['success', 'failure', 'clarification'],
-  'success-failure-retry': ['success', 'failure', 'retry'],
-  'success-failure-review': ['success', 'failure', 'review'],
-  full: ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'],
+export const EXIT_SCHEMAS: readonly string[] = Object.values(EXIT_SCHEMA);
+
+export const ALLOWED_EXITS_BY_SCHEMA: Record<EXIT_SCHEMA, EXIT[]> = {
+  [EXIT_SCHEMA.SUCCESS_FAILURE]: [EXIT.SUCCESS, EXIT.FAILURE],
+  [EXIT_SCHEMA.SUCCESS_FAILURE_CLARIFICATION]: [EXIT.SUCCESS, EXIT.FAILURE, EXIT.CLARIFICATION],
+  [EXIT_SCHEMA.SUCCESS_FAILURE_RETRY]: [EXIT.SUCCESS, EXIT.FAILURE, EXIT.RETRY],
+  [EXIT_SCHEMA.SUCCESS_FAILURE_REVIEW]: [EXIT.SUCCESS, EXIT.FAILURE, EXIT.REVIEW],
+  [EXIT_SCHEMA.FULL]: [
+    EXIT.SUCCESS,
+    EXIT.FAILURE,
+    EXIT.CLARIFICATION,
+    EXIT.BLOCKED,
+    EXIT.RETRY,
+    EXIT.REVIEW,
+  ],
 };

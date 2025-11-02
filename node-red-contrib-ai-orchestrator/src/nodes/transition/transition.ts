@@ -1,4 +1,4 @@
-import { TExit } from '../../constants';
+import { EXIT } from '../../constants';
 import { IOrchestratorMsg, IOrchestratorMsgExtended } from '../../types';
 import { INode, IRED } from '../_common';
 
@@ -31,35 +31,35 @@ interface ITransitionConfig {
 }
 
 function register(RED: IRED): void {
-  function isExit(value: unknown): value is TExit {
+  function isExit(value: unknown): value is EXIT {
     if (typeof value !== 'string') return false;
 
     return (
-      value === 'success'
-      || value === 'failure'
-      || value === 'clarification'
-      || value === 'blocked'
-      || value === 'retry'
-      || value === 'review'
+      value === EXIT.SUCCESS
+      || value === EXIT.FAILURE
+      || value === EXIT.CLARIFICATION
+      || value === EXIT.BLOCKED
+      || value === EXIT.RETRY
+      || value === EXIT.REVIEW
     );
   }
 
-  function selectTeammate(config: ITransitionConfig, exit: TExit): string | undefined {
-    if (exit === 'success') return config.successTeammate?.trim() || undefined;
-    if (exit === 'failure') return config.failureTeammate?.trim() || undefined;
-    if (exit === 'clarification') return config.clarificationTeammate?.trim() || undefined;
-    if (exit === 'blocked') return config.blockedTeammate?.trim() || undefined;
-    if (exit === 'retry') return config.retryTeammate?.trim() || undefined;
+  function selectTeammate(config: ITransitionConfig, exit: EXIT): string | undefined {
+    if (exit === EXIT.SUCCESS) return config.successTeammate?.trim() || undefined;
+    if (exit === EXIT.FAILURE) return config.failureTeammate?.trim() || undefined;
+    if (exit === EXIT.CLARIFICATION) return config.clarificationTeammate?.trim() || undefined;
+    if (exit === EXIT.BLOCKED) return config.blockedTeammate?.trim() || undefined;
+    if (exit === EXIT.RETRY) return config.retryTeammate?.trim() || undefined;
 
     return config.reviewTeammate?.trim() || undefined;
   }
 
-  function selectIntent(config: ITransitionConfig, exit: TExit): string | undefined {
-    if (exit === 'success') return config.successIntent ?? 'first-pass';
-    if (exit === 'failure') return config.failureIntent ?? 'rework';
-    if (exit === 'clarification') return config.clarificationIntent ?? 'human-override';
-    if (exit === 'blocked') return config.blockedIntent ?? 'human-override';
-    if (exit === 'retry') return config.retryIntent ?? 'rework';
+  function selectIntent(config: ITransitionConfig, exit: EXIT): string | undefined {
+    if (exit === EXIT.SUCCESS) return config.successIntent ?? 'first-pass';
+    if (exit === EXIT.FAILURE) return config.failureIntent ?? 'rework';
+    if (exit === EXIT.CLARIFICATION) return config.clarificationIntent ?? 'human-override';
+    if (exit === EXIT.BLOCKED) return config.blockedIntent ?? 'human-override';
+    if (exit === EXIT.RETRY) return config.retryIntent ?? 'rework';
 
     return config.reviewIntent ?? 'human-override';
   }
@@ -77,8 +77,9 @@ function register(RED: IRED): void {
     this.on('input', (msg: IOrchestratorMsg, send, done) => {
       const now = Date.now();
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const exitValue = isExit((msg as { exit?: unknown }).exit) // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ? (msg as { exit: TExit }).exit : 'success';
+      const exitValue = isExit((msg as { exit?: unknown }).exit)
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        ? (msg as { exit: EXIT }).exit : EXIT.SUCCESS;
       const useTable = (config.mode ?? 'passthrough') === 'by-exit';
       const decidedTeammate = useTable ? selectTeammate(config, exitValue) : undefined;
       const decidedIntent = useTable ? selectIntent(config, exitValue) : undefined;
@@ -86,7 +87,8 @@ function register(RED: IRED): void {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const intent = decidedIntent ?? (msg as { nextIntent?: string }).nextIntent;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const tracePrev = Array.isArray((msg as { _trace?: unknown })._trace) // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const tracePrev = Array.isArray((msg as { _trace?: unknown })._trace)
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ? (msg as { _trace: unknown[] })._trace : [];
       const traceEntry = {
         node: 'transition',

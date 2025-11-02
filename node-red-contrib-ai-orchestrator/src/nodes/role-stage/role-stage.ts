@@ -1,4 +1,4 @@
-import { ALLOWED_EXITS_BY_SCHEMA, EXIT_SCHEMAS, EXIT_TO_PORT, TExit } from '../../constants';
+import { ALLOWED_EXITS_BY_SCHEMA, EXIT, EXIT_SCHEMA, EXIT_TO_PORT, TExit } from '../../constants';
 import { IOrchestratorMsg, IOrchestratorMsgExtended } from '../../types';
 import { INode, IRED } from '../_common';
 
@@ -35,26 +35,32 @@ function register(RED: IRED): void {
     return typeof node === 'object' && node !== null;
   }
 
-  function normalizeSchema(schema?: string): string {
-    const allowed = new Set(EXIT_SCHEMAS);
+  function isExitSchema(value: unknown): value is EXIT_SCHEMA {
+    if (typeof value !== 'string') return false;
+    const values = Object.values(EXIT_SCHEMA);
 
-    return allowed.has(schema ?? '') ? String(schema) : 'success-failure';
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return values.indexOf(value as EXIT_SCHEMA) >= 0;
   }
 
-  function allowedExits(schema: string): TExit[] {
-    return ALLOWED_EXITS_BY_SCHEMA[schema] ?? ['success', 'failure'];
+  function normalizeSchema(schema?: string): EXIT_SCHEMA {
+    return isExitSchema(schema) ? schema : EXIT_SCHEMA.SUCCESS_FAILURE;
   }
 
-  function isExit(value: unknown): value is TExit {
+  function allowedExits(schema: EXIT_SCHEMA): EXIT[] {
+    return ALLOWED_EXITS_BY_SCHEMA[schema] ?? [EXIT.SUCCESS, EXIT.FAILURE];
+  }
+
+  function isExit(value: unknown): value is EXIT {
     if (typeof value !== 'string') return false;
 
     return (
-      value === 'success'
-      || value === 'failure'
-      || value === 'clarification'
-      || value === 'blocked'
-      || value === 'retry'
-      || value === 'review'
+      value === EXIT.SUCCESS
+      || value === EXIT.FAILURE
+      || value === EXIT.CLARIFICATION
+      || value === EXIT.BLOCKED
+      || value === EXIT.RETRY
+      || value === EXIT.REVIEW
     );
   }
 
@@ -77,12 +83,14 @@ function register(RED: IRED): void {
       );
       const permitted = allowedExits(chosenSchema);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const requestedExit = isExit((msg as { exit?: unknown }).exit) // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ? (msg as { exit: TExit }).exit : 'success';
+      const requestedExit = isExit((msg as { exit?: unknown }).exit)
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        ? (msg as { exit: EXIT }).exit : EXIT.SUCCESS;
       const effectiveExit = permitted.indexOf(requestedExit) >= 0 ? requestedExit : permitted[0];
       const now = Date.now();
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const prevTrace = Array.isArray((msg as { _trace?: unknown })._trace) // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const prevTrace = Array.isArray((msg as { _trace?: unknown })._trace)
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ? (msg as { _trace: unknown[] })._trace : [];
       const traceEntry = {
         node: 'role-stage',
@@ -102,14 +110,14 @@ function register(RED: IRED): void {
         exit: effectiveExit,
         _trace: prevTrace.concat([traceEntry]),
         _diag: diagUsed ? diagList.concat([
-              {
-                code: 'EXIT_NOT_ALLOWED',
-                wanted: requestedExit,
-                used: effectiveExit,
-                schema: chosenSchema,
-                at: now,
-              },
-            ]) : diagList,
+          {
+            code: 'EXIT_NOT_ALLOWED',
+            wanted: requestedExit,
+            used: effectiveExit,
+            schema: chosenSchema,
+            at: now,
+          },
+        ]) : diagList,
         roleStage: {
           requireHumanGate: config.requireHumanGate ?? false,
         },

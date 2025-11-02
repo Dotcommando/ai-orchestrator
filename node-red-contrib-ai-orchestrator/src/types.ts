@@ -9,13 +9,23 @@ export interface IOrchestratorMsg {
   [k: string]: unknown;
 }
 
-export type TReadMode = 'by-key' | 'by-tags' | 'filter' | 'vector';
-export type TVisibility = 'self' | 'team' | 'teammates';
+export enum READ_MODE {
+  BY_KEY = 'by-key',
+  BY_TAGS = 'by-tags',
+  FILTER = 'filter',
+  VECTOR = 'vector',
+}
+
+export enum VISIBILITY {
+  SELF = 'self',
+  TEAM = 'team',
+  TEAMMATES = 'teammates',
+}
 
 export interface IMemoryReadRequest {
   projectId?: string;
   collection?: string;
-  mode: TReadMode;
+  mode: READ_MODE;
   key?: string;
   tags?: string[];
   filter?: Record<string, unknown>;
@@ -34,7 +44,7 @@ export interface IMemoryWriteRequest {
   text?: string;
   scope?: string;
   scopeRef?: string;
-  visibility?: TVisibility;
+  visibility?: VISIBILITY;
   tags?: string[];
   allowed?: { roles?: string[]; members?: string[] };
   owner?: { memberId?: string; roleKey?: string };

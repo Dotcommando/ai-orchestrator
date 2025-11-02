@@ -2,7 +2,7 @@ import {
   IMemoryReadRequest,
   IOrchestratorMsg,
   IOrchestratorMsgExtended,
-  TReadMode,
+  READ_MODE,
 } from '../../types';
 import { INode, IRED } from '../_common';
 
@@ -10,7 +10,7 @@ interface IMemoryReadConfig {
   name?: string;
   mongo: string;
   collection?: string;
-  mode: TReadMode;
+  mode: READ_MODE;
   key?: string;
   scope?: string;
   scopeRef?: string;

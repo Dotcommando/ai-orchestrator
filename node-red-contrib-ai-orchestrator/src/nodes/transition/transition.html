@@ -1,12 +1,12 @@
+<script src="editor/enums.js"></script>
 <script type="text/javascript">
   (function () {
-    const INTENTS = ['first-pass', 'rework', 'wrapup', 'human-override', 'escalation'];
-
     function fillIntentSelect(selector, current) {
+      const values = (window.AIO_ENUMS && window.AIO_ENUMS.INTENTS) || [];
       const $select = $(selector);
       $select.empty();
-      for (let i = 0; i < INTENTS.length; i++) {
-        const value = INTENTS[i];
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
         const option = $('<option></option>').val(value).text(value);
         if ((current ?? '') === value) option.attr('selected', 'selected');
         $select.append(option);

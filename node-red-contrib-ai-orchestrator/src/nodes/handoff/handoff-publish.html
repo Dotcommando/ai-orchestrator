@@ -1,7 +1,6 @@
+<script src="editor/enums.js"></script>
 <script type="text/javascript">
   (function () {
-    const INTENTS = ['first-pass', 'rework', 'wrapup', 'human-override', 'escalation'];
-
     function toggleMode() {
       const mode = $('#node-input-topicMode').val() ?? 'auto';
       const isAuto = mode === 'auto';
@@ -30,10 +29,11 @@
       oneditprepare: function () {
         const $intent = $('#node-input-intent');
         const currentIntent = this.intent ?? 'first-pass';
+        const intents = (window.AIO_ENUMS && window.AIO_ENUMS.INTENTS) || [];
 
         $intent.empty();
-        for (let i = 0; i < INTENTS.length; i++) {
-          const value = INTENTS[i];
+        for (let i = 0; i < intents.length; i++) {
+          const value = intents[i];
           const option = $('<option></option>').val(value).text(value);
           if (value === currentIntent) option.attr('selected', 'selected');
           $intent.append(option);
