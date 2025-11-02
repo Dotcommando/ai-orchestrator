@@ -1,0 +1,112 @@
+<script type="text/javascript">
+  (function () {
+    const INTENTS = ['first-pass', 'rework', 'wrapup', 'human-override', 'escalation'];
+
+    function toggleMode() {
+      const mode = $('#node-input-topicMode').val() ?? 'auto';
+      const isAuto = mode === 'auto';
+
+      $('.row-topic-manual').toggle(!isAuto);
+      $('.row-topic-auto').toggle(isAuto);
+    }
+
+    RED.nodes.registerType('handoff-subscribe', {
+      category: 'function',
+      color: '#FEE6CE',
+      icon: 'download.svg',
+      defaults: {
+        name: { value: '' },
+        topicMode: { value: 'auto' },
+        topic: { value: '' },
+        match: { value: 'exact' },
+        passNonMatching: { value: false },
+        intents: { value: 'first-pass' },
+        projectId: { value: '' },
+        teammate: { value: '' },
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name ?? 'handoff-subscribe';
+      },
+      oneditprepare: function () {
+        const $intents = $('#node-input-intents');
+        const selected = String(this.intents ?? 'first-pass')
+          .split(',')
+          .map(function (intentName) {
+            return intentName.trim();
+          });
+
+        $intents.empty();
+        for (let i = 0; i < INTENTS.length; i++) {
+          const value = INTENTS[i];
+          const option = $('<option></option>').val(value).text(value);
+          $intents.append(option);
+        }
+        $intents.val(selected);
+
+        $('#node-input-topicMode').on('change', toggleMode);
+        toggleMode();
+      },
+      oneditsave: function () {
+        const mode = $('#node-input-topicMode').val() ?? 'auto';
+        if (mode === 'manual') {
+          const manualTopic = $('#node-input-topic').val() ?? '';
+          if (!manualTopic || typeof manualTopic !== 'string') {
+            RED.notify('Topic is required in manual mode', 'error');
+            throw new Error('invalid manual topic');
+          }
+        }
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="handoff-subscribe">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-topicMode"><i class="fa fa-cog"></i> Topic mode</label>
+        <select id="node-input-topicMode">
+            <option value="auto">auto (project/team/intent)</option>
+            <option value="manual">manual</option>
+        </select>
+    </div>
+
+    <div class="form-row row-topic-manual">
+        <label for="node-input-topic"><i class="fa fa-inbox"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="project/&lt;id&gt;/team/&lt;teammate&gt;/&lt;intent&gt;" />
+    </div>
+
+    <div class="form-row row-topic-auto">
+        <label for="node-input-projectId"><i class="fa fa-key"></i> ProjectId (optional)</label>
+        <input type="text" id="node-input-projectId" placeholder="fallback for msg.projectId" />
+    </div>
+
+    <div class="form-row row-topic-auto">
+        <label for="node-input-teammate"><i class="fa fa-users"></i> Teammate (optional)</label>
+        <input type="text" id="node-input-teammate" placeholder="fallback for msg.actor.to" />
+    </div>
+
+    <div class="form-row row-topic-auto">
+        <label for="node-input-intents"><i class="fa fa-random"></i> Intents</label>
+        <select id="node-input-intents" multiple></select>
+        <em>Hold Ctrl/Cmd to select multiple</em>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-match"><i class="fa fa-filter"></i> Match</label>
+        <select id="node-input-match">
+            <option value="exact">exact</option>
+            <option value="prefix">prefix</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-passNonMatching"><i class="fa fa-share"></i> Pass non-matching</label>
+        <input type="checkbox" id="node-input-passNonMatching" />
+    </div>
+</script>

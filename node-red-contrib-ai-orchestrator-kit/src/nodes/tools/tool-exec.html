@@ -1,0 +1,50 @@
+<script type="text/javascript">
+  (function () {
+    RED.nodes.registerType("tool-exec", {
+      category: "function",
+      color: "#E8DAEF",
+      icon: "wrench.svg",
+      defaults: {
+        name: { value: "" },
+        allowedTools: { value: "[]" },
+        continueOnError: { value: false },
+        assignToPayload: { value: false },
+        assignToResult: { value: true }
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () { return this.name || "tool-exec"; },
+      oneditprepare: function () {
+        const input = $("#node-input-allowedTools");
+        if (!input.val()) input.val("[]");
+      }
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="tool-exec">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-allowedTools"><i class="fa fa-list"></i> Allowed tools (JSON)</label>
+        <input type="text" id="node-input-allowedTools" placeholder='["math.add","string.concat"]' />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-continueOnError"><i class="fa fa-exclamation-circle"></i> Continue on error</label>
+        <input type="checkbox" id="node-input-continueOnError" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assignToPayload"><i class="fa fa-download"></i> Assign to msg.payload</label>
+        <input type="checkbox" id="node-input-assignToPayload" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assignToResult"><i class="fa fa-check"></i> Assign to msg.result.toolResult</label>
+        <input type="checkbox" id="node-input-assignToResult" />
+    </div>
+</script>

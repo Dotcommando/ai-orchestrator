@@ -1,0 +1,67 @@
+<script type="text/javascript">
+  (function () {
+    function validateNonEmpty(selector, fieldName) {
+      const value = $(selector).val() ?? '';
+      if (!value || typeof value !== 'string') {
+        RED.notify(fieldName + ' is required', 'error');
+        throw new Error('invalid ' + fieldName.toLowerCase());
+      }
+    }
+
+    RED.nodes.registerType('mongo-memory', {
+      category: 'config',
+      defaults: {
+        name: { value: '' },
+        url: { value: '${MONGO_URL}', required: true },
+        db: { value: '${MONGO_DB}', required: true },
+        defaultCollection: { value: '${MONGO_COLLECTION_MEM:=mem_chunks}' },
+      },
+      label: function () {
+        const urlValue = this.url ?? '${MONGO_URL}';
+        const dbValue = this.db ?? '${MONGO_DB}';
+
+        return this.name ?? dbValue + '@' + urlValue;
+      },
+      oneditsave: function () {
+        validateNonEmpty('#node-config-input-url', 'URL');
+        validateNonEmpty('#node-config-input-db', 'DB');
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="mongo-memory">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-url"><i class="fa fa-plug"></i> URL</label>
+        <input
+            type="text"
+            id="node-config-input-url"
+            style="width:100%;"
+            placeholder="${MONGO_URL}"
+        />
+        <em>
+            Use env vars like <code>${MONGO_URL}</code> (e.g. <code>mongo+srv://user:pass@cluster/db?opt=1</code>).
+        </em>
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-db"><i class="fa fa-database"></i> DB</label>
+        <input type="text" id="node-config-input-db" placeholder="${MONGO_DB}" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-defaultCollection">
+            <i class="fa fa-table"></i> Default Collection
+        </label>
+        <input
+            type="text"
+            id="node-config-input-defaultCollection"
+            placeholder="${MONGO_COLLECTION_MEM:=mem_chunks}"
+        />
+    </div>
+</script>

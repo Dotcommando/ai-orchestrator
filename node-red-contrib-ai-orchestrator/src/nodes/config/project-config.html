@@ -1,0 +1,76 @@
+<script type="text/javascript">
+  (function () {
+    var EXIT_SCHEMAS = [
+      'success-failure',
+      'success-failure-clarification',
+      'success-failure-retry',
+      'success-failure-review',
+      'full',
+    ];
+
+    RED.nodes.registerType('project-config', {
+      category: 'config',
+      defaults: {
+        name: { value: '' },
+        key: { value: '${PROJECT_KEY}', required: true },
+        defaultExitSchema: { value: 'success-failure' },
+        policy: { value: '{}' },
+      },
+      label: function () {
+        return this.name || this.key || 'project-config';
+      },
+      oneditprepare: function () {
+        var $schema = $('#node-config-input-defaultExitSchema');
+        var current = this.defaultExitSchema || 'success-failure';
+
+        $schema.empty();
+        EXIT_SCHEMAS.forEach(function (s) {
+          var opt = $('<option></option>').val(s).text(s);
+          if (s === current) opt.attr('selected', 'selected');
+          $schema.append(opt);
+        });
+
+        var $policy = $('#node-config-input-policy');
+        if (!$policy.val()) $policy.val('{}');
+      },
+      oneditsave: function () {
+        var raw = $('#node-config-input-policy').val() || '{}';
+
+        try {
+          var v = JSON.parse(String(raw));
+          if (v && typeof v === 'object') return;
+        } catch (e) {}
+
+        RED.notify('Policy must be valid JSON object', 'error');
+        throw new Error('invalid policy json');
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="project-config">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-key"><i class="fa fa-key"></i> Project key</label>
+        <input type="text" id="node-config-input-key" placeholder="${PROJECT_KEY}" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-defaultExitSchema"><i class="fa fa-random"></i> Exit schema</label>
+        <select id="node-config-input-defaultExitSchema"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-policy"><i class="fa fa-cog"></i> Policy (JSON)</label>
+        <input
+            type="text"
+            id="node-config-input-policy"
+            placeholder='{"retries":{"maxAttempts":2,"backoff":"exp","delayMs":1000},"timeouts":{"humanGateMs":86400000,"stageMs":300000}}'
+            style="width:100%;"
+        />
+    </div>
+</script>

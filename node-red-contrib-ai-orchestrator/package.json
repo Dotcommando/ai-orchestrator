@@ -1,0 +1,60 @@
+{
+  "name": "node-red-contrib-ai-orchestrator",
+  "version": "0.1.0",
+  "description": "AI Orchestrator. Allows to create teams of AI agents",
+  "author": "Mikhail Filchushkin <webestet@gmail.com>",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.cjs",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.cjs"
+    }
+  },
+  "node-red": {
+    "nodes": {
+      "project-config": "dist/nodes/config/project-config.cjs",
+      "mongo-memory": "dist/nodes/config/mongo-memory.cjs",
+      "role-profile": "dist/nodes/config/role-profile.cjs",
+      "role-stage": "dist/nodes/role-stage/role-stage.cjs",
+      "transition": "dist/nodes/transition/transition.cjs",
+      "memory-read": "dist/nodes/memory/memory-read.cjs",
+      "memory-write": "dist/nodes/memory/memory-write.cjs",
+      "handoff-publish": "dist/nodes/handoff/handoff-publish.cjs",
+      "handoff-subscribe": "dist/nodes/handoff/handoff-subscribe.cjs",
+      "stage-plan-runner": "dist/nodes/stage-plan-runner/stage-plan-runner.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && cpy \"src/**/*.html\" dist --parents && node scripts/postbuild-fix-extensions.mjs",
+    "watch": "concurrently \"tsc -w\" \"cpy 'src/**/*.html' dist --parents --watch\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.38.0",
+    "@types/node": "24.9.1",
+    "@typescript-eslint/eslint-plugin": "8.46.2",
+    "@typescript-eslint/parser": "8.46.2",
+    "concurrently": "9.2.1",
+    "cpy-cli": "6.0.0",
+    "eslint": "9.38.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-prettier": "5.5.4",
+    "eslint-plugin-simple-import-sort": "12.1.1",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.6",
+    "prettier": "3.6.2",
+    "typescript": "5.9.3"
+  },
+  "lint-staged": {
+    "*.{ts,js,mjs,cjs}": [
+      "eslint --fix"
+    ],
+    "*.json": [
+      "prettier --write"
+    ]
+  }
+}

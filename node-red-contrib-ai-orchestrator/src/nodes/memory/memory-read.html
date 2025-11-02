@@ -1,0 +1,137 @@
+<script type="text/javascript">
+  (function () {
+    const READ_MODES = ['by-key', 'by-tags', 'filter', 'vector'];
+
+    function toggleMode() {
+      const selectedMode = $('#node-input-mode').val() ?? 'by-key';
+
+      $('.row-key').toggle(selectedMode === 'by-key');
+      $('.row-tags').toggle(selectedMode === 'by-tags');
+      $('.row-filter').toggle(selectedMode === 'filter');
+      $('.row-vector').toggle(selectedMode === 'vector');
+      $('.row-limit').toggle(selectedMode !== 'vector');
+      $('.row-topK').toggle(selectedMode === 'vector');
+    }
+
+    function validateJson(selector, allowArray) {
+      const rawValue = $(selector).val() ?? '';
+      const textValue = String(rawValue);
+      if (textValue.trim().length === 0) return;
+
+      try {
+        const parsed = JSON.parse(textValue);
+        if (allowArray) return;
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) return;
+      } catch {}
+
+      RED.notify('Invalid JSON in ' + selector, 'error');
+      throw new Error('invalid json in ' + selector);
+    }
+
+    RED.nodes.registerType('memory-read', {
+      category: 'function',
+      color: '#DDEEFF',
+      icon: 'db.svg',
+      defaults: {
+        name: { value: '' },
+        mongo: { type: 'mongo-memory', required: true },
+        collection: { value: '' },
+        mode: { value: 'by-key' },
+        key: { value: '' },
+        scope: { value: '' },
+        scopeRef: { value: '' },
+        tags: { value: '' },
+        filterJson: { value: '' },
+        vectorJson: { value: '' },
+        limit: { value: 10 },
+        topK: { value: 5 },
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name ?? 'memory-read';
+      },
+      oneditprepare: function () {
+        const $modeSelect = $('#node-input-mode');
+        const currentMode = this.mode ?? 'by-key';
+
+        $modeSelect.empty();
+        for (let i = 0; i < READ_MODES.length; i++) {
+          const mode = READ_MODES[i];
+          const option = $('<option></option>').val(mode).text(mode);
+          if (mode === currentMode) option.attr('selected', 'selected');
+          $modeSelect.append(option);
+        }
+
+        $modeSelect.on('change', toggleMode);
+        toggleMode();
+      },
+      oneditsave: function () {
+        validateJson('#node-input-filterJson', false);
+        validateJson('#node-input-vectorJson', true);
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="memory-read">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-mongo"><i class="fa fa-plug"></i> Mongo config</label>
+        <input type="text" id="node-input-mongo" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-collection"><i class="fa fa-table"></i> Collection</label>
+        <input type="text" id="node-input-collection" placeholder="mem_chunks (default)" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-filter"></i> Mode</label>
+        <select id="node-input-mode"></select>
+    </div>
+
+    <div class="form-row row-key">
+        <label for="node-input-key"><i class="fa fa-key"></i> Key</label>
+        <input type="text" id="node-input-key" placeholder="memory key" />
+    </div>
+
+    <div class="form-row row-tags">
+        <label for="node-input-tags"><i class="fa fa-tags"></i> Tags (CSV)</label>
+        <input type="text" id="node-input-tags" placeholder="tag1, tag2" />
+    </div>
+
+    <div class="form-row row-filter">
+        <label for="node-input-filterJson"><i class="fa fa-code"></i> Filter (JSON)</label>
+        <input type="text" id="node-input-filterJson" placeholder='{"scope":"doc"}' />
+    </div>
+
+    <div class="form-row row-vector">
+        <label for="node-input-vectorJson"><i class="fa fa-bullseye"></i> Vector (JSON array)</label>
+        <input type="text" id="node-input-vectorJson" placeholder='[0.12, 0.01, ...]' />
+    </div>
+
+    <div class="form-row row-limit">
+        <label for="node-input-limit"><i class="fa fa-sort-numeric-asc"></i> Limit</label>
+        <input type="number" id="node-input-limit" min="1" />
+    </div>
+
+    <div class="form-row row-topK">
+        <label for="node-input-topK"><i class="fa fa-sort-numeric-asc"></i> topK</label>
+        <input type="number" id="node-input-topK" min="1" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-scope"><i class="fa fa-sitemap"></i> Scope</label>
+        <input type="text" id="node-input-scope" placeholder="e.g. issue, doc, task" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-scopeRef"><i class="fa fa-link"></i> ScopeRef</label>
+        <input type="text" id="node-input-scopeRef" placeholder="e.g. ISSUE-123" />
+    </div>
+</script>

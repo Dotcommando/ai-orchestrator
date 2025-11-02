@@ -1,0 +1,135 @@
+<script type="text/javascript">
+  (function () {
+    const INTENTS = ['first-pass', 'rework', 'wrapup', 'human-override', 'escalation'];
+
+    function fillIntentSelect(selector, current) {
+      const $select = $(selector);
+      $select.empty();
+      for (let i = 0; i < INTENTS.length; i++) {
+        const value = INTENTS[i];
+        const option = $('<option></option>').val(value).text(value);
+        if ((current ?? '') === value) option.attr('selected', 'selected');
+        $select.append(option);
+      }
+    }
+
+    function toggleMode() {
+      const mode = $('#node-input-mode').val() ?? 'passthrough';
+      const isTable = mode === 'by-exit';
+      $('.row-table').toggle(isTable);
+    }
+
+    RED.nodes.registerType('transition', {
+      category: 'function',
+      color: '#E0ECF8',
+      icon: 'merge.svg',
+      defaults: {
+        name: { value: '' },
+        project: { type: 'project-config' },
+        role: { type: 'role-profile' },
+        mode: { value: 'passthrough' },
+        emitTopic: { value: false },
+
+        successTeammate: { value: '' },
+        successIntent: { value: 'first-pass' },
+
+        failureTeammate: { value: '' },
+        failureIntent: { value: 'rework' },
+
+        clarificationTeammate: { value: '' },
+        clarificationIntent: { value: 'human-override' },
+
+        blockedTeammate: { value: '' },
+        blockedIntent: { value: 'human-override' },
+
+        retryTeammate: { value: '' },
+        retryIntent: { value: 'rework' },
+
+        reviewTeammate: { value: '' },
+        reviewIntent: { value: 'human-override' },
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name ?? 'transition';
+      },
+      oneditprepare: function () {
+        fillIntentSelect('#node-input-successIntent', this.successIntent);
+        fillIntentSelect('#node-input-failureIntent', this.failureIntent);
+        fillIntentSelect('#node-input-clarificationIntent', this.clarificationIntent);
+        fillIntentSelect('#node-input-blockedIntent', this.blockedIntent);
+        fillIntentSelect('#node-input-retryIntent', this.retryIntent);
+        fillIntentSelect('#node-input-reviewIntent', this.reviewIntent);
+
+        $('#node-input-mode').on('change', toggleMode);
+        toggleMode();
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="transition">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-project"><i class="fa fa-key"></i> Project config</label>
+        <input type="text" id="node-input-project" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-role"><i class="fa fa-user"></i> Role profile</label>
+        <input type="text" id="node-input-role" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-random"></i> Mode</label>
+        <select id="node-input-mode">
+            <option value="passthrough">passthrough</option>
+            <option value="by-exit">by-exit</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-emitTopic"><i class="fa fa-paper-plane"></i> Emit topic</label>
+        <input type="checkbox" id="node-input-emitTopic" />
+    </div>
+
+    <div class="form-row row-table">
+        <strong>On success →</strong>
+        <input type="text" id="node-input-successTeammate" placeholder="teammate e.g. qa#1" />
+        <select id="node-input-successIntent"></select>
+    </div>
+
+    <div class="form-row row-table">
+        <strong>On failure →</strong>
+        <input type="text" id="node-input-failureTeammate" placeholder="teammate e.g. dev#2" />
+        <select id="node-input-failureIntent"></select>
+    </div>
+
+    <div class="form-row row-table">
+        <strong>On clarification →</strong>
+        <input type="text" id="node-input-clarificationTeammate" placeholder="teammate" />
+        <select id="node-input-clarificationIntent"></select>
+    </div>
+
+    <div class="form-row row-table">
+        <strong>On blocked →</strong>
+        <input type="text" id="node-input-blockedTeammate" placeholder="teammate" />
+        <select id="node-input-blockedIntent"></select>
+    </div>
+
+    <div class="form-row row-table">
+        <strong>On retry →</strong>
+        <input type="text" id="node-input-retryTeammate" placeholder="teammate" />
+        <select id="node-input-retryIntent"></select>
+    </div>
+
+    <div class="form-row row-table">
+        <strong>On review →</strong>
+        <input type="text" id="node-input-reviewTeammate" placeholder="teammate" />
+        <select id="node-input-reviewIntent"></select>
+    </div>
+</script>

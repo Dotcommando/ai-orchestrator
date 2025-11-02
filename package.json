@@ -1,0 +1,13 @@
+{
+  "name": "ai-orchestrator",
+  "private": true,
+  "workspaces": [
+    "node-red-contrib-ai-orchestrator",
+    "node-red-contrib-ai-orchestrator-kit"
+  ],
+  "scripts": {
+    "build": "npm run build -w node-red-contrib-ai-orchestrator && npm run build -w node-red-contrib-ai-orchestrator-kit",
+    "watch": "npm run watch -w node-red-contrib-ai-orchestrator & npm run watch -w node-red-contrib-ai-orchestrator-kit",
+    "lint": "npm run lint -w node-red-contrib-ai-orchestrator && npm run lint -w node-red-contrib-ai-orchestrator-kit"
+  }
+}

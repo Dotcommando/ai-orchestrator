@@ -1,0 +1,91 @@
+<script type="text/javascript">
+  RED.nodes.registerType('role-profile', {
+    category: 'config',
+    defaults: {
+      name: { value: '' },
+      key: { value: 'dev', required: true },
+      tools: { value: '[]' },
+      mcpEndpoints: { value: '[]' },
+      params: { value: '{}' },
+      memoryAccess: { value: '{}' },
+    },
+    label: function () {
+      return this.name || this.key || 'role-profile';
+    },
+    oneditprepare: function () {
+      var $tools = $('#node-config-input-tools');
+      var $mcp = $('#node-config-input-mcpEndpoints');
+      var $params = $('#node-config-input-params');
+      var $acl = $('#node-config-input-memoryAccess');
+
+      if (!$tools.val()) $tools.val('[]');
+      if (!$mcp.val()) $mcp.val('[]');
+      if (!$params.val()) $params.val('{}');
+      if (!$acl.val()) $acl.val('{}');
+    },
+    oneditsave: function () {
+      var parse = function (sel, expectArray) {
+        var raw = $(sel).val() || (expectArray ? '[]' : '{}');
+        var val;
+
+        try {
+          val = JSON.parse(String(raw));
+        } catch (e) {
+          RED.notify('Invalid JSON in ' + sel, 'error');
+          throw new Error('invalid json: ' + sel);
+        }
+
+        if (expectArray && !Array.isArray(val)) {
+          RED.notify('Expected array in ' + sel, 'error');
+          throw new Error('invalid type: ' + sel);
+        }
+
+        if (!expectArray && (typeof val !== 'object' || val === null || Array.isArray(val))) {
+          RED.notify('Expected object in ' + sel, 'error');
+          throw new Error('invalid type: ' + sel);
+        }
+      };
+
+      parse('#node-config-input-tools', true);
+      parse('#node-config-input-mcpEndpoints', true);
+      parse('#node-config-input-params', false);
+      parse('#node-config-input-memoryAccess', false);
+    },
+  });
+</script>
+
+<script type="text/html" data-template-name="role-profile">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-key"><i class="fa fa-user"></i> Role key</label>
+        <input type="text" id="node-config-input-key" placeholder="dev / qa / po" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-tools"><i class="fa fa-wrench"></i> Tools (JSON)</label>
+        <input type="text" id="node-config-input-tools" placeholder='["lint","build"]' />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-mcpEndpoints"><i class="fa fa-plug"></i> MCP (JSON)</label>
+        <input type="text" id="node-config-input-mcpEndpoints" placeholder='["local:mcp"]' />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-params"><i class="fa fa-cog"></i> Params (JSON)</label>
+        <input type="text" id="node-config-input-params" placeholder='{"temp":0.2}' />
+    </div>
+
+    <div class="form-row">
+        <label for="node-config-input-memoryAccess"><i class="fa fa-shield"></i> Memory ACL (JSON)</label>
+        <input
+            type="text"
+            id="node-config-input-memoryAccess"
+            placeholder='{"read":["team"],"write":["self"],"allowedRoles":["dev","qa"]}'
+        />
+    </div>
+</script>

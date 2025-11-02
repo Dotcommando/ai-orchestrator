@@ -1,0 +1,20 @@
+<script type="text/javascript">
+  RED.nodes.registerType("stage-plan-runner", {
+    category: "function",
+    color: "#D9E6F2",
+    icon: "flow.svg",
+    defaults: {
+      name: { value: "" },
+    },
+    inputs: 1,
+    outputs: 1,
+    label: function () { return this.name || "stage-plan-runner"; },
+  });
+</script>
+
+<script type="text/html" data-template-name="stage-plan-runner">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name">
+    </div>
+</script>

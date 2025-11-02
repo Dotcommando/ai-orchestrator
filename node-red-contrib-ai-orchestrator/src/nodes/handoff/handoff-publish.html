@@ -1,0 +1,92 @@
+<script type="text/javascript">
+  (function () {
+    const INTENTS = ['first-pass', 'rework', 'wrapup', 'human-override', 'escalation'];
+
+    function toggleMode() {
+      const mode = $('#node-input-topicMode').val() ?? 'auto';
+      const isAuto = mode === 'auto';
+
+      $('.row-topic-manual').toggle(!isAuto);
+      $('.row-topic-auto').toggle(isAuto);
+    }
+
+    RED.nodes.registerType('handoff-publish', {
+      category: 'function',
+      color: '#FDD0A2',
+      icon: 'send.svg',
+      defaults: {
+        name: { value: '' },
+        topicMode: { value: 'auto' },
+        topic: { value: '' },
+        intent: { value: 'first-pass' },
+        projectId: { value: '' },
+        teammate: { value: '' },
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name ?? 'handoff-publish';
+      },
+      oneditprepare: function () {
+        const $intent = $('#node-input-intent');
+        const currentIntent = this.intent ?? 'first-pass';
+
+        $intent.empty();
+        for (let i = 0; i < INTENTS.length; i++) {
+          const value = INTENTS[i];
+          const option = $('<option></option>').val(value).text(value);
+          if (value === currentIntent) option.attr('selected', 'selected');
+          $intent.append(option);
+        }
+
+        $('#node-input-topicMode').on('change', toggleMode);
+        toggleMode();
+      },
+      oneditsave: function () {
+        const mode = $('#node-input-topicMode').val() ?? 'auto';
+        if (mode === 'manual') {
+          const manualTopic = $('#node-input-topic').val() ?? '';
+          if (!manualTopic || typeof manualTopic !== 'string') {
+            RED.notify('Topic is required in manual mode', 'error');
+            throw new Error('invalid manual topic');
+          }
+        }
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="handoff-publish">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-topicMode"><i class="fa fa-cog"></i> Topic mode</label>
+        <select id="node-input-topicMode">
+            <option value="auto">auto (project/team/intent)</option>
+            <option value="manual">manual</option>
+        </select>
+    </div>
+
+    <div class="form-row row-topic-manual">
+        <label for="node-input-topic"><i class="fa fa-paper-plane"></i> Topic</label>
+        <input type="text" id="node-input-topic" placeholder="project/&lt;id&gt;/team/&lt;teammate&gt;/&lt;intent&gt;" />
+    </div>
+
+    <div class="form-row row-topic-auto">
+        <label for="node-input-intent"><i class="fa fa-random"></i> Intent</label>
+        <select id="node-input-intent"></select>
+    </div>
+
+    <div class="form-row row-topic-auto">
+        <label for="node-input-projectId"><i class="fa fa-key"></i> ProjectId (optional)</label>
+        <input type="text" id="node-input-projectId" placeholder="fallback for msg.projectId" />
+    </div>
+
+    <div class="form-row row-topic-auto">
+        <label for="node-input-teammate"><i class="fa fa-users"></i> Teammate (optional)</label>
+        <input type="text" id="node-input-teammate" placeholder="fallback for msg.actor.to" />
+    </div>
+</script>

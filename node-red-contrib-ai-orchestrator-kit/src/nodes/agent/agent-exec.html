@@ -1,0 +1,73 @@
+<script type="text/javascript">
+  (function () {
+    const SCHEMAS = [
+      'full',
+      'success-failure',
+      'success-failure-clarification',
+      'success-failure-retry',
+      'success-failure-review',
+    ];
+    const ON_EXHAUSTED = ['retry', 'failure', 'review', 'clarification'];
+    const PREFER_BLOCKED_AS = ['failure', 'review', 'clarification'];
+
+    function fillSelect(selector, values, current, fallback) {
+      const el = $(selector);
+      el.empty();
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        const opt = $('<option></option>').val(value).text(value);
+        if ((current ?? fallback) === value) opt.attr('selected', 'selected');
+        el.append(opt);
+      }
+    }
+
+    RED.nodes.registerType('agent-exec', {
+      category: 'function',
+      color: '#D6EAF8',
+      icon: 'cog.svg',
+      defaults: {
+        name: { value: '' },
+        exitSchema: { value: 'full' },
+        maxAttempts: { value: 0 },
+        onExhausted: { value: 'retry' },
+        preferBlockedAs: { value: 'failure' },
+      },
+      inputs: 1,
+      outputs: 6,
+      outputLabels: ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'],
+      label: function () { return this.name || 'agent-exec'; },
+      oneditprepare: function () {
+        fillSelect('#node-input-exitSchema', SCHEMAS, this.exitSchema, 'full');
+        fillSelect('#node-input-onExhausted', ON_EXHAUSTED, this.onExhausted, 'retry');
+        fillSelect('#node-input-preferBlockedAs', PREFER_BLOCKED_AS, this.preferBlockedAs, 'failure');
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="agent-exec">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-exitSchema"><i class="fa fa-random"></i> Exit schema</label>
+        <select id="node-input-exitSchema"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-maxAttempts"><i class="fa fa-repeat"></i> Max attempts (0 = off)</label>
+        <input type="number" id="node-input-maxAttempts" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-onExhausted"><i class="fa fa-exclamation-triangle"></i> On exhausted</label>
+        <select id="node-input-onExhausted"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-preferBlockedAs"><i class="fa fa-ban"></i> Map blocked as</label>
+        <select id="node-input-preferBlockedAs"></select>
+    </div>
+</script>

@@ -1,0 +1,80 @@
+<script type="text/javascript">
+  (function () {
+    const PROVIDERS = ['', 'echo', 'openai', 'anthropic'];
+    const RESPONSE_FORMATS = ['text', 'json'];
+    const THREAD_SCOPES = ['per-teammate', 'per-project', 'per-task'];
+
+    function fillSelect(selector, values, current, fallback) {
+      const selectEl = $(selector);
+      selectEl.empty();
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        const option = $('<option></option>').val(value).text(value || '(auto from role)');
+        if ((current ?? fallback) === value) option.attr('selected', 'selected');
+        selectEl.append(option);
+      }
+    }
+
+    RED.nodes.registerType('llm-call', {
+      category: 'function',
+      color: '#D6EAF8',
+      icon: 'font.svg',
+      defaults: {
+        name: { value: '' },
+        providerKey: { value: '' },
+        model: { value: '' },
+        threadScope: { value: 'per-teammate' },
+        responseFormat: { value: 'text' },
+        useSystem: { value: true },
+        useUser: { value: true }
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name ?? 'llm-call';
+      },
+      oneditprepare: function () {
+        fillSelect('#node-input-providerKey', PROVIDERS, this.providerKey, '');
+        fillSelect('#node-input-responseFormat', RESPONSE_FORMATS, this.responseFormat, 'text');
+        fillSelect('#node-input-threadScope', THREAD_SCOPES, this.threadScope, 'per-teammate');
+      }
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="llm-call">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-providerKey"><i class="fa fa-plug"></i> Provider</label>
+        <select id="node-input-providerKey"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-model"><i class="fa fa-cube"></i> Model</label>
+        <input type="text" id="node-input-model" placeholder="auto from role-profile.params.model" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-threadScope"><i class="fa fa-link"></i> Thread scope</label>
+        <select id="node-input-threadScope"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-responseFormat"><i class="fa fa-exchange"></i> Response format</label>
+        <select id="node-input-responseFormat"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-useSystem"><i class="fa fa-cog"></i> Use system</label>
+        <input type="checkbox" id="node-input-useSystem" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-useUser"><i class="fa fa-user"></i> Use user</label>
+        <input type="checkbox" id="node-input-useUser" />
+    </div>
+</script>

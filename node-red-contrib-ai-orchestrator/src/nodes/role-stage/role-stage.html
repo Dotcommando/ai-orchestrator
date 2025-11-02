@@ -1,0 +1,78 @@
+<script type="text/javascript">
+  (function () {
+    const EXIT_SCHEMAS = [
+      'success-failure',
+      'success-failure-clarification',
+      'success-failure-retry',
+      'success-failure-review',
+      'full',
+    ];
+
+    function fillSchemaSelect(current) {
+      const $schema = $('#node-input-exitSchema');
+      $schema.empty();
+      for (let i = 0; i < EXIT_SCHEMAS.length; i++) {
+        const value = EXIT_SCHEMAS[i];
+        const option = $('<option></option>').val(value).text(value);
+        if ((current ?? 'success-failure') === value) option.attr('selected', 'selected');
+        $schema.append(option);
+      }
+    }
+
+    RED.nodes.registerType('role-stage', {
+      category: 'function',
+      color: '#E5F5E0',
+      icon: 'arrow-in.svg',
+      defaults: {
+        name: { value: '' },
+        project: { type: 'project-config' },
+        role: { type: 'role-profile' },
+        exitSchema: { value: 'success-failure' },
+        requireHumanGate: { value: false },
+      },
+      inputs: 1,
+      outputs: 6,
+      outputLabels: [
+        'success',
+        'failure',
+        'clarification',
+        'blocked',
+        'retry',
+        'review',
+      ],
+      label: function () {
+        return this.name ?? 'role-stage';
+      },
+      oneditprepare: function () {
+        fillSchemaSelect(this.exitSchema);
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="role-stage">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-project"><i class="fa fa-key"></i> Project config</label>
+        <input type="text" id="node-input-project" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-role"><i class="fa fa-user"></i> Role profile</label>
+        <input type="text" id="node-input-role" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-exitSchema"><i class="fa fa-random"></i> Exit schema</label>
+        <select id="node-input-exitSchema"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-requireHumanGate"><i class="fa fa-shield"></i> Require human gate</label>
+        <input type="checkbox" id="node-input-requireHumanGate" />
+    </div>
+</script>

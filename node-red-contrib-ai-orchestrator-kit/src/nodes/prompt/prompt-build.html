@@ -1,0 +1,36 @@
+<script type="text/javascript">
+  (function () {
+    RED.nodes.registerType('prompt-build', {
+      category: 'function',
+      color: '#FFF3CD',
+      icon: 'font.svg',
+      defaults: {
+        name: { value: '' },
+        systemTemplate: { value: 'You are ${roleProfile.key} in project ${projectId}.', required: true },
+        userTemplate: { value: '${payload.prompt}', required: true }
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name ?? 'prompt-build';
+      }
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="prompt-build">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-systemTemplate"><i class="fa fa-cog"></i> System template</label>
+        <textarea id="node-input-systemTemplate" rows="4" style="width:100%;"></textarea>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-userTemplate"><i class="fa fa-user"></i> User template</label>
+        <textarea id="node-input-userTemplate" rows="6" style="width:100%;"></textarea>
+    </div>
+</script>

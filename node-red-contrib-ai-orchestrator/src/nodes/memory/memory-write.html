@@ -1,0 +1,119 @@
+<script type="text/javascript">
+  (function () {
+    function validateJson(selector, allowArray) {
+      const raw = $(selector).val() ?? '';
+      const text = String(raw);
+      if (text.trim().length === 0) return;
+
+      try {
+        const parsed = JSON.parse(text);
+        if (allowArray) return;
+        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) return;
+      } catch (e) {}
+
+      RED.notify('Invalid JSON in ' + selector, 'error');
+      throw new Error('invalid json in ' + selector);
+    }
+
+    RED.nodes.registerType('memory-write', {
+      category: 'function',
+      color: '#CCE8CC',
+      icon: 'save.svg',
+      defaults: {
+        name: { value: '' },
+        mongo: { type: 'mongo-memory', required: true },
+        collection: { value: '' },
+        key: { value: '' },
+        text: { value: '' },
+        scope: { value: '' },
+        scopeRef: { value: '' },
+        visibility: { value: 'self' },
+        tags: { value: '' },
+        allowedRolesJson: { value: '' },
+        allowedMembersJson: { value: '' },
+        ttlMs: { value: 0 },
+        upsert: { value: true },
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name ?? 'memory-write';
+      },
+      oneditsave: function () {
+        validateJson('#node-input-allowedRolesJson', true);
+        validateJson('#node-input-allowedMembersJson', true);
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="memory-write">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-mongo"><i class="fa fa-plug"></i> Mongo config</label>
+        <input type="text" id="node-input-mongo" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-collection"><i class="fa fa-table"></i> Collection</label>
+        <input type="text" id="node-input-collection" placeholder="mem_chunks (default)" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-key"><i class="fa fa-key"></i> Key</label>
+        <input type="text" id="node-input-key" placeholder="unique key (optional)" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-text"><i class="fa fa-file-text-o"></i> Text</label>
+        <input type="text" id="node-input-text" placeholder="content to store" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-scope"><i class="fa fa-sitemap"></i> Scope</label>
+        <input type="text" id="node-input-scope" placeholder="e.g. issue, doc, task" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-scopeRef"><i class="fa fa-link"></i> ScopeRef</label>
+        <input type="text" id="node-input-scopeRef" placeholder="e.g. ISSUE-123" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-visibility"><i class="fa fa-shield"></i> Visibility</label>
+        <select id="node-input-visibility">
+            <option value="self">self</option>
+            <option value="team">team</option>
+            <option value="teammates">teammates</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-tags"><i class="fa fa-tags"></i> Tags (CSV)</label>
+        <input type="text" id="node-input-tags" placeholder="tag1, tag2" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-allowedRolesJson"><i class="fa fa-users"></i> allowedRoles (JSON array)</label>
+        <input type="text" id="node-input-allowedRolesJson" placeholder='["dev","qa"]' />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-allowedMembersJson"><i class="fa fa-user"></i> allowedMembers (JSON array)</label>
+        <input type="text" id="node-input-allowedMembersJson" placeholder='["dev#1","qa#2"]' />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-ttlMs"><i class="fa fa-hourglass-half"></i> TTL (ms)</label>
+        <input type="number" id="node-input-ttlMs" min="0" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-upsert"><i class="fa fa-refresh"></i> Upsert</label>
+        <input type="checkbox" id="node-input-upsert" />
+    </div>
+</script>
