@@ -20,16 +20,16 @@ export default [
         sourceType: 'module',
         ecmaVersion: 2022,
         project: path.join(__dirname, 'tsconfig.json'),
-        tsconfigRootDir: __dirname,
+        tsconfigRootDir: __dirname
       },
       globals: {
-        console: 'readonly',
-      },
+        console: 'readonly'
+      }
     },
     plugins: {
       '@typescript-eslint': tsPlugin,
       'simple-import-sort': simpleImportSort,
-      '@stylistic': stylistic,
+      '@stylistic': stylistic
     },
     rules: {
       'padding-line-between-statements': 'off',
@@ -38,8 +38,9 @@ export default [
         { blankLine: 'always', prev: ['const', 'let', 'var'], next: '*' },
         { blankLine: 'never', prev: ['const', 'let', 'var'], next: ['const', 'let', 'var'] },
         { blankLine: 'always', prev: '*', next: ['if', 'for', 'while', 'switch', 'try', 'do'] },
+        { blankLine: 'always', prev: 'if', next: ['const', 'let', 'var'] },
         { blankLine: 'always', prev: '*', next: 'return' },
-        { blankLine: 'never', prev: 'if', next: 'if' },
+        { blankLine: 'never', prev: 'if', next: 'if' }
       ],
       'no-multiple-empty-lines': ['error', { max: 1, maxBOF: 0, maxEOF: 1 }],
       'keyword-spacing': ['error', { before: true, after: true }],
@@ -57,9 +58,9 @@ export default [
             '?': 'before',
             ':': 'before',
             '&&': 'before',
-            '||': 'before',
-          },
-        },
+            '||': 'before'
+          }
+        }
       ],
       '@typescript-eslint/prefer-optional-chain': ['error', { allowPotentiallyUnsafeFixesThatModifyTheReturnTypeIKnowWhatImDoing: true }],
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
@@ -67,7 +68,7 @@ export default [
       '@typescript-eslint/consistent-type-assertions': ['error', { assertionStyle: 'never' }],
       'simple-import-sort/imports': 'error',
       'simple-import-sort/exports': 'error',
-      ...tsPlugin.configs['recommended'].rules,
-    },
-  },
+      ...tsPlugin.configs['recommended'].rules
+    }
+  }
 ];
