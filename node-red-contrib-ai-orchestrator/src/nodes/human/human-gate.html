@@ -1,0 +1,205 @@
+<script type="text/javascript">
+  (function () {
+    function fillSelect(id, values, current, fallback) {
+      var el = $(id);
+      el.empty();
+      for (var i = 0; i < values.length; i++) {
+        var v = values[i];
+        var opt = $('<option></option>').val(v).text(v);
+        ((current ?? fallback) === v) && opt.attr('selected', 'selected');
+        el.append(opt);
+      }
+    }
+
+    function togglePatch() {
+      var applyPatch = $('#node-input-applyPatch').val() ?? 'none';
+      var allowEdits = $('#node-input-allowEdits').is(':checked');
+      $('.row-patch').toggle(allowEdits && applyPatch !== 'none');
+    }
+
+    function toggleNotify() {
+      var mode = $('#node-input-topicNotifyMode').val() ?? 'none';
+      $('.row-notify-topic').toggle(mode === 'manual');
+    }
+
+    function toggleMode() {
+      var mode = $('#node-input-mode').val() ?? 'gate';
+      var isDelay = mode === 'delay-only';
+      $('.row-requireAck').toggle(!isDelay);
+      $('.row-allowEdits').toggle(!isDelay);
+      $('.row-filters').toggle(!isDelay);
+      $('.row-bind').toggle(!isDelay);
+    }
+
+    RED.nodes.registerType('human-gate', {
+      category: 'function',
+      color: '#FCF3CF',
+      icon: 'pause.svg',
+      defaults: {
+        name: { value: '' },
+
+        mode: { value: 'gate' },
+
+        requireAck: { value: true },
+        allowEdits: { value: true },
+
+        slaMs: { value: 86400000 },
+        remindEveryMs: { value: 0 },
+        onTimeoutAs: { value: 'clarification' },
+        onRejectAs: { value: 'failure' },
+        onScopeChangeAs: { value: 'review' },
+
+        allowedAuthorsCsv: { value: '' },
+        allowedSourcesCsv: { value: '' },
+        allowTeammates: { value: true },
+
+        bindBy: { value: 'work' },
+        acceptOutOfOrder: { value: false },
+
+        applyPatch: { value: 'text' },
+        patchTarget: { value: 'payload' },
+        requireTests: { value: false },
+
+        emitLog: { value: true },
+        topicNotifyMode: { value: 'none' },
+        notifyTopic: { value: '' },
+      },
+      inputs: 1,
+      outputs: 6,
+      outputLabels: ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'],
+      label: function () {
+        return this.name ?? 'human-gate';
+      },
+      oneditprepare: function () {
+        var EXITS = (globalThis.AIO_ENUMS && globalThis.AIO_ENUMS.EXIT_SCHEMAS)
+          ? ['success', 'failure', 'clarification', 'blocked', 'retry', 'review']
+          : ['success', 'failure', 'clarification', 'blocked', 'retry', 'review'];
+
+        fillSelect('#node-input-mode', ['gate', 'delay-only'], this.mode, 'gate');
+        fillSelect('#node-input-onTimeoutAs', EXITS, this.onTimeoutAs, 'clarification');
+        fillSelect('#node-input-onRejectAs', EXITS, this.onRejectAs, 'failure');
+        fillSelect('#node-input-onScopeChangeAs', EXITS, this.onScopeChangeAs, 'review');
+
+        fillSelect('#node-input-bindBy', ['project', 'work', 'issue', 'topic'], this.bindBy, 'work');
+        fillSelect('#node-input-applyPatch', ['none', 'text', 'json', 'yaml', 'code-diff'], this.applyPatch, 'text');
+        fillSelect('#node-input-patchTarget', ['payload', 'result'], this.patchTarget, 'payload');
+        fillSelect('#node-input-topicNotifyMode', ['none', 'auto', 'manual'], this.topicNotifyMode, 'none');
+
+        $('#node-input-applyPatch').on('change', togglePatch);
+        $('#node-input-allowEdits').on('change', togglePatch);
+        $('#node-input-topicNotifyMode').on('change', toggleNotify);
+        $('#node-input-mode').on('change', toggleMode);
+
+        togglePatch();
+        toggleNotify();
+        toggleMode();
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="human-gate">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-mode"><i class="fa fa-random"></i> Mode</label>
+        <select id="node-input-mode"></select>
+    </div>
+
+    <div class="form-row row-requireAck">
+        <label for="node-input-requireAck"><i class="fa fa-check-square-o"></i> Require Ack</label>
+        <input type="checkbox" id="node-input-requireAck" />
+    </div>
+
+    <div class="form-row row-allowEdits">
+        <label for="node-input-allowEdits"><i class="fa fa-pencil"></i> Allow edits</label>
+        <input type="checkbox" id="node-input-allowEdits" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-slaMs"><i class="fa fa-hourglass-half"></i> SLA (ms)</label>
+        <input type="number" id="node-input-slaMs" min="0" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-remindEveryMs"><i class="fa fa-bell-o"></i> Remind every (ms)</label>
+        <input type="number" id="node-input-remindEveryMs" min="0" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-onTimeoutAs"><i class="fa fa-exclamation-triangle"></i> On timeout</label>
+        <select id="node-input-onTimeoutAs"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-onRejectAs"><i class="fa fa-times-circle"></i> On reject</label>
+        <select id="node-input-onRejectAs"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-onScopeChangeAs"><i class="fa fa-exchange"></i> On scope-change</label>
+        <select id="node-input-onScopeChangeAs"></select>
+    </div>
+
+    <div class="form-row row-filters">
+        <label for="node-input-allowedAuthorsCsv"><i class="fa fa-users"></i> Allowed authors (CSV)</label>
+        <input type="text" id="node-input-allowedAuthorsCsv" placeholder="user1,user2" />
+    </div>
+
+    <div class="form-row row-filters">
+        <label for="node-input-allowedSourcesCsv"><i class="fa fa-slack"></i> Allowed sources (CSV)</label>
+        <input type="text" id="node-input-allowedSourcesCsv" placeholder="github,slack,telegram" />
+    </div>
+
+    <div class="form-row row-filters">
+        <label for="node-input-allowTeammates"><i class="fa fa-user-plus"></i> Allow teammates</label>
+        <input type="checkbox" id="node-input-allowTeammates" />
+    </div>
+
+    <div class="form-row row-bind">
+        <label for="node-input-bindBy"><i class="fa fa-link"></i> Bind by</label>
+        <select id="node-input-bindBy"></select>
+    </div>
+
+    <div class="form-row row-bind">
+        <label for="node-input-acceptOutOfOrder"><i class="fa fa-random"></i> Accept late overrides</label>
+        <input type="checkbox" id="node-input-acceptOutOfOrder" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-applyPatch"><i class="fa fa-file-text-o"></i> Apply patch</label>
+        <select id="node-input-applyPatch"></select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-patchTarget"><i class="fa fa-download"></i> Patch target</label>
+        <select id="node-input-patchTarget"></select>
+    </div>
+
+    <div class="form-row row-patch">
+        <em>‘text’: положит содержимое в <code>[payload|result].text</code>. ‘json’: глубокий merge по верхнему уровню.</em>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-requireTests"><i class="fa fa-clipboard"></i> Require tests on approve</label>
+        <input type="checkbox" id="node-input-requireTests" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-emitLog"><i class="fa fa-list"></i> Emit log</label>
+        <input type="checkbox" id="node-input-emitLog" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-topicNotifyMode"><i class="fa fa-paper-plane"></i> Notify mode</label>
+        <select id="node-input-topicNotifyMode"></select>
+    </div>
+
+    <div class="form-row row-notify-topic">
+        <label for="node-input-notifyTopic"><i class="fa fa-inbox"></i> Notify topic</label>
+        <input type="text" id="node-input-notifyTopic" placeholder="project/&lt;id&gt;/team/&lt;member&gt;/human-override" />
+    </div>
+</script>
