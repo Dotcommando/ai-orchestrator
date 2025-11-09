@@ -1,0 +1,53 @@
+<script type="text/javascript">
+  (function () {
+    RED.nodes.registerType('mcp-call', {
+      category: 'ai-orchestrator-kit',
+      color: '#E8F8F5',
+      icon: 'plug.svg',
+      defaults: {
+        name: { value: '' },
+        allowedEndpoints: { value: '[]' },
+        continueOnError: { value: false },
+        assignToPayload: { value: false },
+        assignToResult: { value: true },
+      },
+      inputs: 1,
+      outputs: 1,
+      label: function () {
+        return this.name || 'mcp-call';
+      },
+      oneditprepare: function () {
+        const $allowed = $('#node-input-allowedEndpoints');
+
+        if (!$allowed.val()) $allowed.val('[]');
+      },
+    });
+  })();
+</script>
+
+<script type="text/html" data-template-name="mcp-call">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-allowedEndpoints"><i class="fa fa-list"></i> Allowed endpoints (JSON)</label>
+        <input type="text" id="node-input-allowedEndpoints" placeholder='["serp","analytics","internal:mcp"]' />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-continueOnError"><i class="fa fa-exclamation-circle"></i> Continue on error</label>
+        <input type="checkbox" id="node-input-continueOnError" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assignToPayload"><i class="fa fa-download"></i> Assign to msg.payload.mcpResults</label>
+        <input type="checkbox" id="node-input-assignToPayload" />
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-assignToResult"><i class="fa fa-check"></i> Assign to msg.result.mcpResults</label>
+        <input type="checkbox" id="node-input-assignToResult" />
+    </div>
+</script>
