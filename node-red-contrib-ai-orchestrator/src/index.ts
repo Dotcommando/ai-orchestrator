@@ -9,3 +9,4 @@ import './nodes/memory/memory-write';
 import './nodes/handoff/handoff-publish';
 import './nodes/handoff/handoff-subscribe';
 import './nodes/stage-plan-runner/stage-plan-runner';
+import './nodes/human/human-gate';

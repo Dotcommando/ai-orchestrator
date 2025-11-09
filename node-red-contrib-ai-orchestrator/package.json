@@ -23,7 +23,8 @@
       "memory-write": "dist/nodes/memory/memory-write.cjs",
       "handoff-publish": "dist/nodes/handoff/handoff-publish.cjs",
       "handoff-subscribe": "dist/nodes/handoff/handoff-subscribe.cjs",
-      "stage-plan-runner": "dist/nodes/stage-plan-runner/stage-plan-runner.cjs"
+      "stage-plan-runner": "dist/nodes/stage-plan-runner/stage-plan-runner.cjs",
+      "human-gate": "dist/nodes/human/human-gate.cjs"
     }
   },
   "scripts": {
